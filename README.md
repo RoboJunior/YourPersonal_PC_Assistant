@@ -47,12 +47,12 @@ If you want a clear understanding of this project refer to the below project
 👇
 
 
-[Voice Assistant Ai](https://github.com/RoboJunior/Voice_Assistant_Ai)
+- [Voice Assistant Ai](https://github.com/RoboJunior/Voice_Assistant_Ai)
 
 ## Documentation
 This model was taken from hugging face click the below link for downloading the weights of the model from hugging face
 
-[Model](https://linktodocumentation) 📌
+- [Model](https://linktodocumentation) 📌
 
 
 ## Authors
