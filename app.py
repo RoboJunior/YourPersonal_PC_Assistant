@@ -11,6 +11,28 @@ import psutil
 import wmi
 
 pc = wmi.WMI()
+my_cpu = cpuinfo.get_cpu_info()
+
+
+class ModelPrompt:
+    PROMPT = """Greetings! We're thrilled to assist you with any inquiries or guidance related to Intel products. 
+    To ensure we provide you with the most relevant information, 
+    could you please share your specific interests or needs? 
+    Whether you're exploring the latest innovations, seeking 
+    product recommendations, or have questions about our technology, 
+    we're here to help you make the most informed decisions."""
+    USER_PROMPT_ANALYZE = """Please analyze and benchmark my system. 
+    Provide insights on the architecture, processor type, operating system, processor name, total RAM, and graphics card. 
+    Ensure to include performance metrics and any recommendations for optimization. Thank you!"""
+    USER_PROMPT_ISSUE = """Certainly, I'm here to help. 
+    To better understand and diagnose the performance issues, could you provide more details about the specific problems you're encountering? 
+    Any error messages, recent changes, or unusual behavior would be valuable information."""
+    ARCHITECTURE = f"Architecture : {platform.architecture()}"
+    PROCESSOR_TYPE = f"Architecture : {platform.platform()}"
+    OPERATING_SYSTEM = f"Architecture : {platform.processor()}"
+    PROCESSOR_NAME = f"Processor name: {my_cpu['brand_raw']}"
+    TOTAL_RAM = f"Total ram installed: {psutil.virtual_memory().total/1024/1024/1024:.2f} GB"
+    GRAPHICS_CARD = f"Graphics card installed: {pc.Win32_VideoController()[0].name}"
 
 class VoiceAssistant:
     def __init__(self) -> None:
@@ -18,16 +40,9 @@ class VoiceAssistant:
         self.filename_no = random.randint(1,100)
         self.filename = "input"
         self.faker_ = Faker()
-        self.prompt = "Greetings! We're thrilled to assist you with any inquiries or guidance related to Intel products. To ensure we provide you with the most relevant information, could you please share your specific interests or needs? Whether you're exploring the latest innovations, seeking product recommendations, or have questions about our technology, we're here to help you make the most informed decisions."
-        self.user_prompt_analyze = "Please analyze and benchmark my system. Provide insights on the architecture, processor type, operating system, processor name, total RAM, and graphics card. Ensure to include performance metrics and any recommendations for optimization. Thank you!"
-        self.user_prompt_issue = "Certainly, I'm here to help. To better understand and diagnose the performance issues, could you provide more details about the specific problems you're encountering? Any error messages, recent changes, or unusual behavior would be valuable information."
-        self.architecture = f"Architecture : {platform.architecture()}"
-        self.processor_type = f"Architecture : {platform.platform()}"
-        self.operating_system = f"Architecture : {platform.processor()}"
-        my_cpu = cpuinfo.get_cpu_info()
-        self.processor_name = f"Processor name: {my_cpu['brand_raw']}"
-        self.total_ram = f"Total ram installed: {psutil.virtual_memory().total/1024/1024/1024:.2f} GB"
-        self.graphics_card = f"Graphics card installed: {pc.Win32_VideoController()[0].name}"
+        self.stop = "bye"
+        self.analyse = "analyse"
+        self.issue = "issue"
 
     
     def speak_text(self,text,rate=170,volume=1.0):
@@ -44,6 +59,7 @@ class VoiceAssistant:
     
     def voice_assistant(self):
         self.greet()
+        model_prompt = ModelPrompt()
         recognizer = sr.Recognizer()
         voice_bot = True
         while voice_bot:
@@ -58,23 +74,21 @@ class VoiceAssistant:
                     transcription = transcription.lower()
                     print(transcription)
                     vc_model = Model()
-                    model_response = vc_model.model_response(transcription,self.prompt)
+                    model_response = vc_model.model_response(transcription,model_prompt.PROMPT)
                     self.speak_text(model_response)
                     print(model_response)
-                    if "bye" in transcription:
+                    if self.stop in transcription:
                         voice_bot = False
-                    if "analyse" in transcription:
-                        user_response = f"""These are my system requirements{self.architecture} {self.processor_type} {self.operating_system} 
-                        {self.processor_name} {self.total_ram} {self.graphics_card}"""
-                        model_analyzed = vc_model.model_response(user_response,self.user_prompt_analyze)
+                    if self.analyse in transcription:
+                        user_response = f"""{model_prompt.ARCHITECTURE} {model_prompt.PROCESSOR_TYPE} {model_prompt.OPERATING_SYSTEM} 
+                        {model_prompt.PROCESSOR_NAME} {model_prompt.TOTAL_RAM} {model_prompt.GRAPHICS_CARD}"""
+                        model_analyzed = vc_model.model_response(user_response,model_prompt.USER_PROMPT_ANALYZE)
                         self.speak_text(model_analyzed)
                         print(model_analyzed)
-                    if "issue" in transcription:
-                        model_response = vc_model.model_response(transcription,self.user_prompt_issue)
+                    if self.issue in transcription:
+                        model_response = vc_model.model_response(transcription,model_prompt.USER_PROMPT_ISSUE)
                         self.speak_text(model_response)
                         print(model_response)
-
-
                 except Exception as e:
                     print(f"Exception"+str(e))
        
@@ -108,3 +122,11 @@ class Model:
         assistant_response_bot = assistant_response.replace("<|assistant|>","")
 
         return assistant_response_bot
+
+
+
+
+
+jr = VoiceAssistant()
+jr.voice_assistant()
+
